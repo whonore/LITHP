@@ -13,14 +13,23 @@ def quit(msg):
 def main(input):
     with open(input) as file:
         p = parser.Parser(file)
+
         tree = p.parse()
         expr = evaluate(tree, {})
+        while True:
+            printResult(expr)
+            tree = p.parse()
+            if tree is None:
+                break
+            expr = evaluate(tree, {})
 
-        if isa(expr, tuple):
-            print("<lambda {} . {}, {}>".
-                  format(expr[0][0], expr[0][1], expr[1]))
-        else:
-            print(expr)
+
+def printResult(expr):
+    if isa(expr, tuple):
+        print("<lambda {} . {}, {}>".
+              format(expr[0][0], expr[0][1], expr[1]))
+    else:
+        print(expr)
 
 
 def evaluate(tree, env):

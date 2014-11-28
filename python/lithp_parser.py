@@ -57,8 +57,9 @@ class Parser():
             self.consume(")")
 
             return AppNode(lexpr, rexpr)
-
-        quit("Invalid token {}.".format(tok))
+        elif type == "EOF":
+            self.consume("EOF", 0)
+            return None
 
 
 class NumNode():
