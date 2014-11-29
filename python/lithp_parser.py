@@ -75,6 +75,7 @@ class Parser():
         else:
             quit("{}: Did not expect {} at this time.".format(loc, tok))
 
+
 class NumNode():
     def __init__(self, val):
         self.val = val

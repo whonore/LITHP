@@ -13,9 +13,15 @@ COL = 1
 
 
 def char_read(in_stream):
-    global COL
+    global COL, LINE
+    char = in_stream.read(1)
+
     COL += 1
-    return in_stream.read(1)
+    if char in ('\n', '\r'):
+        LINE += 1
+        COL = 1
+
+    return char
 
 
 def char_peek(in_stream):
@@ -27,13 +33,13 @@ def char_peek(in_stream):
 
 
 def next_token(in_stream):
-    global COL, LINE
-
     char = char_read(in_stream)
+
     while char in WHITESPACE:
-        if char in ('\n', '\r'):
-            LINE += 1
-            COL = 1
+        char = char_read(in_stream)
+    if char == "%":
+        while char not in ('\n', '\r', ''):
+            char = char_read(in_stream)
         char = char_read(in_stream)
 
     if char in SYMBOLS:
