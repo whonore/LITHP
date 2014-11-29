@@ -38,11 +38,15 @@ def next_token(in_stream):
 
     if char in SYMBOLS:
         return (SYMBOLS[char], char, (LINE, COL - 1))
-    elif char.isdigit():  # change to accept decimal
+    elif char.isdigit():
         num = char
         while char_peek(in_stream).isdigit():
             num += char_read(in_stream)
-        return ("num", int(num), (LINE, COL - len(num)))
+        if char_peek(in_stream) == ".":
+            num += char_read(in_stream)
+            while char_peek(in_stream).isdigit():
+                num += char_read(in_stream)
+        return ("num", float(num), (LINE, COL - len(num)))
     elif char.isalpha():
         ident = char
         while char_peek(in_stream).isalpha():
