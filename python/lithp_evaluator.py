@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 
 import sys
 import lithp_parser as parser
@@ -14,8 +14,8 @@ def quit(msg):
 def evalFile(input):
     with open(input) as file:
         p = parser.Parser(file)
-
         tree = p.parse()
+
         type, expr = evaluate(tree, {})
         while True:
             printResult(type, expr)
@@ -39,17 +39,14 @@ def evaluate(tree, env):
         return ("value", tree.val)
     elif isa(tree, parser.IDNode):
         if tree.val in env:
-            type, expr = env[tree.val]
-            return (type, expr)
+            return env[tree.val]
         elif tree.val in GLOBAL_ENV:
-            type, expr = GLOBAL_ENV[tree.val]
-            return (type, expr)
+            return GLOBAL_ENV[tree.val]
         quit("Undefined identifier: {}.".format(tree.val))
     elif isa(tree, parser.LambdaNode):
         return ("closure", ((tree.id.val, tree.expr), env))
     elif isa(tree, parser.DefineNode):
-        type, expr = evaluate(tree.expr, env)
-        GLOBAL_ENV[tree.id.val] = (type, expr)
+        GLOBAL_ENV[tree.id.val] = evaluate(tree.expr, env)
         return ("definition", None)
     elif isa(tree, parser.AppNode):
         try:

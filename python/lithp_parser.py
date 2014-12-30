@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 
 import sys
 import lithp_tokenizer as tokenizer

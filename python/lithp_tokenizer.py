@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 
 WHITESPACE = (' ', '\t', '\n', '\r')
 KEYWORDS = ("lambda", "def")
@@ -6,7 +6,8 @@ SYMBOLS = {
     '(': "lparen",
     ')': "rparen",
     '.': "dot",
-    '=': "equal"
+    '=': "equal",
+    '+': "plus"
 }
 LINE = 1
 COL = 1
