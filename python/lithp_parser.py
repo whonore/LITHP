@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 
 import sys
 import lithp_tokenizer as tokenizer
@@ -17,31 +17,28 @@ class Parser():
         if self.tok[type_or_tok] == expect:
             self.tok = next_token(self.in_stream)
         else:
-            quit("Invalid token {}. Expected {}.".
-                 format(self.tok[type_or_tok], expect))
+            quit("{}: Invalid token {}. Expected {}.".
+                 format(self.tok[2], self.tok[type_or_tok], expect))
 
     def parse(self):
-        type, tok = self.tok
+        type, tok, loc = self.tok
 
         if type == "num":
             self.consume("num", 0)
             return NumNode(tok)
         elif type == "identifier":
-            if tok != "lambda":
-                self.consume("identifier", 0)
-                return IDNode(tok)
-            quit("lambda is not a valid identifier.")
+            self.consume("identifier", 0)
+            return IDNode(tok)
         elif type == "lparen":
             self.consume("(")
-            type, tok = self.tok
+            type, tok, loc = self.tok
 
             if tok == "lambda":
                 self.consume("lambda")
-                type, tok = self.tok
+                type, tok, loc = self.tok
 
                 self.consume("identifier", 0)
                 id = IDNode(tok)
-                type, tok = self.tok
 
                 self.consume(".")
 
@@ -51,14 +48,32 @@ class Parser():
 
                 return LambdaNode(id, expr)
 
+            elif tok == "def":
+                self.consume("def")
+                type, tok, loc = self.tok
+
+                self.consume("identifier", 0)
+                id = IDNode(tok)
+
+                self.consume("=")
+
+                expr = self.parse()
+
+                self.consume(")")
+
+                return DefineNode(id, expr)
+
             lexpr = self.parse()
             rexpr = self.parse()
 
             self.consume(")")
 
             return AppNode(lexpr, rexpr)
-
-        quit("Invalid token {}.".format(tok))
+        elif type == "EOF":
+            self.consume("EOF", 0)
+            return None
+        else:
+            quit("{}: Did not expect {} at this time.".format(loc, tok))
 
 
 class NumNode():
@@ -94,6 +109,19 @@ class LambdaNode():
 
     def __str__(self):
         return "(lambda {} . {})".format(str(self.id), str(self.expr))
+
+
+class DefineNode():
+    def __init__(self, id, expr):
+        self.id = id
+        self.expr = expr
+
+    def __repr__(self):
+        return ("DefineNode(\nID: {}\nExpr: {})".
+                format(str(self.id), str(self.expr)))
+
+    def __str__(self):
+        return "(def {} = {})".format(str(self.id), str(self.expr))
 
 
 class AppNode():

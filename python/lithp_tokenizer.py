@@ -1,10 +1,28 @@
-#!/usr/bin/env
+#!/usr/bin/env python
 
 WHITESPACE = (' ', '\t', '\n', '\r')
+KEYWORDS = ("lambda", "def")
+SYMBOLS = {
+    '(': "lparen",
+    ')': "rparen",
+    '.': "dot",
+    '=': "equal",
+    '+': "plus"
+}
+LINE = 1
+COL = 1
 
 
 def char_read(in_stream):
-    return in_stream.read(1)
+    global COL, LINE
+    char = in_stream.read(1)
+
+    COL += 1
+    if char in ('\n', '\r'):
+        LINE += 1
+        COL = 1
+
+    return char
 
 
 def char_peek(in_stream):
@@ -15,25 +33,33 @@ def char_peek(in_stream):
     return char
 
 
-def next_token(in_stream):  # add location for error
+def next_token(in_stream):
     char = char_read(in_stream)
+
     while char in WHITESPACE:
         char = char_read(in_stream)
+    if char == "%":
+        while char not in ('\n', '\r', ''):
+            char = char_read(in_stream)
+        char = char_read(in_stream)
 
-    if char == '(':
-        return ("lparen", char)
-    elif char == ')':
-        return ("rparen", char)
-    elif char == '.':
-        return ("dot", char)
-    elif char.isdigit():  # change to accept decimal
+    if char in SYMBOLS:
+        return (SYMBOLS[char], char, (LINE, COL - 1))
+    elif char.isdigit():
         num = char
         while char_peek(in_stream).isdigit():
             num += char_read(in_stream)
-        return ("num", int(num))
-    elif char.isalpha():  # change to accept numbers
+        if char_peek(in_stream) == ".":
+            num += char_read(in_stream)
+            while char_peek(in_stream).isdigit():
+                num += char_read(in_stream)
+        return ("num", float(num), (LINE, COL - len(num)))
+    elif char.isalpha():
         ident = char
         while char_peek(in_stream).isalpha():
             ident += char_read(in_stream)
-        return ("identifier", ident)
-    return ("EOF", None)
+
+        if ident in KEYWORDS:
+            return ("keyword", ident, (LINE, COL - len(ident)))
+        return ("identifier", ident, (LINE, COL - len(ident)))
+    return ("EOF", None, (LINE, COL))
