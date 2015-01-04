@@ -16,13 +16,10 @@ def evalFile(input):
         p = parser.Parser(file)
         tree = p.parse()
 
-        type, expr = evaluate(tree, {})
-        while True:
+        while tree is not None:
+            type, expr = evaluate(tree, {})
             printResult(type, expr)
             tree = p.parse()
-            if tree is None:
-                break
-            type, expr = evaluate(tree, {})
 
 
 def printResult(type, expr):
@@ -34,20 +31,41 @@ def printResult(type, expr):
         print(expr)
 
 
+def isTrue(val):
+    type, expr = val
+    if type != "value":
+        quit("{} cannot be evaluated as true or false.".format(type))
+
+    return expr != 0
+
+
 def evaluate(tree, env):
     if isa(tree, parser.NumNode):
         return ("value", tree.val)
+
     elif isa(tree, parser.IDNode):
         if tree.val in env:
             return env[tree.val]
+
         elif tree.val in GLOBAL_ENV:
             return GLOBAL_ENV[tree.val]
+
         quit("Undefined identifier: {}.".format(tree.val))
+
     elif isa(tree, parser.LambdaNode):
         return ("closure", ((tree.id.val, tree.expr), env))
+
     elif isa(tree, parser.DefineNode):
         GLOBAL_ENV[tree.id.val] = evaluate(tree.expr, env)
         return ("definition", None)
+
+    elif isa(tree, parser.IfNode):
+        cond = evaluate(tree.cond, env)
+
+        if isTrue(cond):
+            return evaluate(tree.true_branch, env)
+        return evaluate(tree.else_branch, env)
+
     elif isa(tree, parser.AppNode):
         try:
             rtype, right = evaluate(tree.rexpr, env)
@@ -64,6 +82,7 @@ def evaluate(tree, env):
         except RuntimeError:
             quit("Recursion depth exceeded. ({})".
                  format(str(sys.getrecursionlimit())))
+
     else:
         quit("Error.")
 
