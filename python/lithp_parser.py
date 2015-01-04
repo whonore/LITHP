@@ -26,9 +26,11 @@ class Parser():
         if type == "num":
             self.consume("num", 0)
             return NumNode(tok)
+
         elif type == "identifier":
             self.consume("identifier", 0)
             return IDNode(tok)
+
         elif type == "lparen":
             self.consume("(")
             type, tok, loc = self.tok
@@ -63,15 +65,30 @@ class Parser():
 
                 return DefineNode(id, expr)
 
+            elif tok == "if":
+                self.consume("if")
+
+                cond = self.parse()
+
+                true_branch = self.parse()
+
+                else_branch = self.parse()
+
+                self.consume(")")
+
+                return IfNode(cond, true_branch, else_branch)
+
             lexpr = self.parse()
             rexpr = self.parse()
 
             self.consume(")")
 
             return AppNode(lexpr, rexpr)
+
         elif type == "EOF":
             self.consume("EOF", 0)
             return None
+
         else:
             quit("{}: Did not expect {} at this time.".format(loc, tok))
 
@@ -122,6 +139,23 @@ class DefineNode():
 
     def __str__(self):
         return "(def {} = {})".format(str(self.id), str(self.expr))
+
+
+class IfNode():
+    def __init__(self, cond, true_branch, else_branch):
+        self.cond = cond
+        self.true_branch = true_branch
+        self.else_branch = else_branch
+
+    def __repr__(self):
+        return ("IfNode(\nCond: {}\nTrue: {}\nElse: {})".
+                format(str(self.cond), str(self.true_branch),
+                       str(self.else_branch)))
+
+    def __str__(self):
+        return ("(if {} {} {})".
+                format(str(self.cond), str(self.true_branch),
+                       str(self.else_branch)))
 
 
 class AppNode():

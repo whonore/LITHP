@@ -1,0 +1,45 @@
+% A set of tests for LITHP
+% Numbers
+1
+1.1
+% -1
+
+% Lambdas
+(lambda x . x)
+(lambda y . (lambda x . x))
+
+% Application
+((lambda z . z) 3.2)
+((lambda x . x) (lambda y . y))
+
+% Partial application
+(lambda a . ((lambda b . b) 2))
+((lambda c . (lambda d . d)) 1)
+
+% Multiple expressions on a line
+(lambda x. y) 3 4.5
+
+% Expression over multiple lines
+(lambda x.
+    x)
+    
+% Definitions
+(def idtoid = ((lambda x. x) (lambda y. y)))
+(idtoid 3.14)
+(def second = (lambda x. (lambda y.y)))
+second
+(second 5.1)
+(def six = 6)
+((second 5) six)
+
+% If statements
+(if 1 2 3)
+(if :t
+    2
+    3)
+(def isxtrue = (lambda x. (if x
+                              :t :f)))
+(isxtrue 2)
+(isxtrue 0)
+(isxtrue :f)
+(if (isxtrue :f) 2 3)

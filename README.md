@@ -17,4 +17,9 @@ Grammar:
                  
                  (expr expr) |
                  
-                 (def IDENTIFIER = expr)
+                 (def IDENTIFIER = expr) |
+                 
+                 (if expr expr expr)
+                 
+NUM is of the form [0-9]+(.)?[0-9]*
+IDENTIFIER is of the form [a-zA-Z]+
